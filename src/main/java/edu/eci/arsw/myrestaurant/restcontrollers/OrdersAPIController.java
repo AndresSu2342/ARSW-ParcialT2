@@ -19,10 +19,14 @@ package edu.eci.arsw.myrestaurant.restcontrollers;
 import edu.eci.arsw.myrestaurant.model.Order;
 import edu.eci.arsw.myrestaurant.model.ProductType;
 import edu.eci.arsw.myrestaurant.model.RestaurantProduct;
+import edu.eci.arsw.myrestaurant.services.OrderServicesException;
 import edu.eci.arsw.myrestaurant.services.RestaurantOrderServicesStub;
-import java.util.Hashtable;
-import java.util.Map;
+import edu.eci.arsw.myrestaurant.beans.impl.BasicBillCalculator;
+
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,7 +38,23 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author hcadavid
  */
+@RestController
+@RequestMapping(value = "/orders")
 public class OrdersAPIController {
-
-    
+     private RestaurantOrderServicesStub orderService = new RestaurantOrderServicesStub();
+     private BasicBillCalculator calculatorBill;
+     @RequestMapping(method = RequestMethod.GET)
+     public ResponseEntity<?> GetOrder() {
+          try {
+               List<Order> listOrders = new ArrayList<>();
+               Set<Integer> response = orderService.getTablesWithOrders();
+               for (Integer n: response) {
+                    Order order = orderService.getTableOrder(n);
+                    listOrders.add(order);
+               }
+               return new ResponseEntity<>(listOrders,HttpStatus.OK);
+          } catch (Exception ex) {
+               return new ResponseEntity<>("Error", HttpStatus.NOT_FOUND);
+          }
+     }
 }
