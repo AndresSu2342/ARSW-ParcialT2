@@ -42,17 +42,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/orders")
 public class OrdersAPIController {
      private RestaurantOrderServicesStub orderService = new RestaurantOrderServicesStub();
-     private BasicBillCalculator calculatorBill;
      @RequestMapping(method = RequestMethod.GET)
      public ResponseEntity<?> GetOrder() {
           try {
-               List<Order> listOrders = new ArrayList<>();
                Set<Integer> response = orderService.getTablesWithOrders();
+               List<Object> listResponse = new ArrayList<>();
                for (Integer n: response) {
                     Order order = orderService.getTableOrder(n);
-                    listOrders.add(order);
+                    listResponse.add(order);
+                    orderService.setBillCalculator(new BasicBillCalculator());
+                    listResponse.add("Total de orden " + n + ": " + orderService.calculateTableBill(n));
                }
-               return new ResponseEntity<>(listOrders,HttpStatus.OK);
+               return new ResponseEntity<>(listResponse,HttpStatus.OK);
           } catch (Exception ex) {
                return new ResponseEntity<>("Error", HttpStatus.NOT_FOUND);
           }
